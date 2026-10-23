@@ -1,3 +1,4 @@
+
 name: Build Geode Mod
 
 on:
@@ -10,9 +11,8 @@ on:
 
 jobs:
   build:
-    # mod.json only lists Windows (gd.win), so Windows is the only target.
-    name: Windows
-    runs-on: windows-latest
+    name: Android64
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7
@@ -21,12 +21,7 @@ jobs:
         uses: geode-sdk/build-geode-mod@main
         with:
           combine: true
-          target: Win64
-          # The bindings repo's main branch is mid-update for a newer GD
-          # version and does not build against stable SDK 5.11.2. Pin it to
-          # the last commit before the 5.11.2 release, and build the matching
-          # Codegen from source. Remove both lines once Geode publishes the
-          # next stable release.
+          target: Android64
           bindings-ref: 1605f500d053f8de122bf5c7dc6d17c24866e02e
           configure-args: -DSKIP_BUILDING_CODEGEN=OFF
 
@@ -46,9 +41,6 @@ jobs:
           name: Build Output
           path: ${{ steps.build.outputs.build-output }}
 
-      # When a version tag (v1.0.2, ...) is pushed, attach the CI-built .geode
-      # to that tag's release, creating the release if needed. It never
-      # overwrites a file that is already on the release.
       - name: Attach build to release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
@@ -60,3 +52,4 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" "$OUT_DIR"/*.geode --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
           fi
+          
